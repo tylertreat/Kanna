@@ -1,0 +1,53 @@
+application: kanna-dev
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+skip_files: |
+ ^(.*/)?(
+ (app\.yaml)|
+ (app\.yml)|
+ (#.*#)|
+ (.*~)|
+ (.*\.py[co])|
+ (.*/RCS/.*)|
+ (\..*)|
+ )$
+
+builtins:
+- appstats: on
+- remote_api: on
+
+admin_console:
+  pages:
+  - name: Appstats
+    url: /_ah/stats/
+
+libraries:
+- name: jinja2
+  version: "2.6"
+- name: markupsafe
+  version: "0.15"
+- name: webapp2
+  version: latest
+
+handlers:
+- url: /favicon.ico
+  static_files: static/img/favicon.ico
+  upload: static/img/favicon.ico
+
+- url: /robots.txt
+  static_files: static/robots.txt
+  upload: static/robots.txt
+
+- url: /static
+  static_dir: static
+
+- url: /_ah/queue/async.*
+  script: furious_router.app
+  login: admin
+
+- url: .*
+  script: main.app
+
