@@ -1,4 +1,7 @@
+from google.appengine.api import images
 from google.appengine.ext import ndb
+
+from kanna import settings
 
 
 class Photo(ndb.Model):
@@ -9,4 +12,9 @@ class Photo(ndb.Model):
     owner = ndb.KeyProperty(kind='User', required=True)
     blob_key = ndb.BlobKeyProperty()
     location = ndb.GeoPtProperty()
+
+    @property
+    def serving_url(self):
+        return images.get_serving_url(self.blob_key,
+                                      size=settings.MAP_THUMBNAIL_SIZE)
 

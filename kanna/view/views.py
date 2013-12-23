@@ -2,6 +2,7 @@ from google.appengine.ext.webapp import blobstore_handlers
 
 from flask import render_template
 
+from kanna import settings
 from kanna.auth import get_session_user
 from kanna.view.blueprint import blueprint
 
@@ -18,7 +19,16 @@ def index():
 
     user = get_session_user()
 
-    return render_template('index.html', photos=user.photos)
+    return render_template('index.html', photos=user.photos,
+                           api_key=settings.MAPS_API_KEY,
+                           map_thumbnail_size=settings.MAP_THUMBNAIL_SIZE)
+
+
+@blueprint.route('/upload')
+def upload():
+    """Render the upload page."""
+
+    return render_template('upload.html')
 
 
 class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
