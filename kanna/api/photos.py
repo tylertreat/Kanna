@@ -44,11 +44,10 @@ def upload():
     blob_key = files.blobstore.get_blob_key(blob_io)
 
     image = Image.open(StringIO(image_data))
-    lat_lon = exif.get_lat_lon(exif.get_exif_data(image))
-    location = None if not lat_lon else ndb.GeoPt(*lat_lon)
+    lat, lon = exif.get_lat_lon(exif.get_exif_data(image))
 
     Photo(name=file_name, owner=user.key, blob_key=blob_key,
-          location=location).put()
+          location=ndb.GeoPt(lat, lon)).put()
 
     return redirect('/')
 
