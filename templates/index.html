@@ -22,6 +22,9 @@
     };
     var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     {% for photo in photos %}
+        {%- if photo.location.lat is not defined or photo.location.lon is not defined %}
+            {% continue %}
+        {% endif %}
         var pos = new google.maps.LatLng({{ photo.location.lat }}, {{ photo.location.lon }});
         new google.maps.Marker({
             position: pos,
