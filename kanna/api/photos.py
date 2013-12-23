@@ -51,9 +51,10 @@ def upload():
 
     image = Image.open(StringIO(image_data))
     lat, lon = exif.get_lat_lon(exif.get_exif_data(image))
+    location = None if not lat or not lon else ndb.GeoPt(lat, lon)
 
     Photo(name=file_name, owner=user.key, blob_key=blob_key,
-          location=ndb.GeoPt(lat, lon)).put()
+          location=location).put()
 
     return redirect('/')
 
