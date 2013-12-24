@@ -40,7 +40,7 @@
         });
 
         google.maps.event.addListener(marker, 'click', function() {
-            window.location = '{{ photo.serving_url(size=None) }}';
+            window.location = '/view/{{ photo.key.id() }}';
         });
 
     {% endfor %}

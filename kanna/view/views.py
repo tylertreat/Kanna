@@ -1,9 +1,8 @@
-from google.appengine.ext.webapp import blobstore_handlers
-
 from flask import render_template
 
 from kanna import settings
 from kanna.auth import get_session_user
+from kanna.model.photo import Photo
 from kanna.view.blueprint import blueprint
 
 
@@ -31,10 +30,14 @@ def upload():
     return render_template('upload.html')
 
 
-class UploadHandler(blobstore_handlers.BlobstoreUploadHandler):
+@blueprint.route('/view/<int:photo_id>')
+def view(photo_id):
+    """Render the photo view page."""
 
-    def post(self):
-        upload_files = self.get_uploads('file')
-        blob_info = upload_files[0]
-        self.redirect('/serve/%s' % blob_info.key())
+    photo = Photo.get_by_id(photo_id)
+
+    if not photo:
+        return render_template('404.html'), 404
+
+    return render_template('photo.html', photo=photo)
 
