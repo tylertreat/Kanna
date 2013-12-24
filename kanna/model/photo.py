@@ -13,8 +13,6 @@ class Photo(ndb.Model):
     blob_key = ndb.BlobKeyProperty()
     location = ndb.GeoPtProperty()
 
-    @property
-    def serving_url(self):
-        return images.get_serving_url(self.blob_key,
-                                      size=settings.MAP_THUMBNAIL_SIZE)
+    def serving_url(self, size=settings.MAP_THUMBNAIL_SIZE):
+        return images.get_serving_url(self.blob_key, size=size)
 

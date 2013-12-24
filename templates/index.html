@@ -18,7 +18,8 @@
     var mapOptions = {
       mapTypeId: google.maps.MapTypeId.TERRAIN,
       center: new google.maps.LatLng(40.0, -100.0),
-      zoom: 4
+      zoom: 4,
+      minZoom: 3
     };
     var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     {% for photo in photos %}
@@ -26,17 +27,22 @@
             {% continue %}
         {% endif %}
         var pos = new google.maps.LatLng({{ photo.location.lat }}, {{ photo.location.lon }});
-        new google.maps.Marker({
+        var marker = new google.maps.Marker({
             position: pos,
             map: map,
             title: '{{ photo.name }}',
             icon: {
-                url: '{{ photo.serving_url }}',
+                url: '{{ photo.serving_url() }}',
                 size: new google.maps.Size({{ map_thumbnail_size }}, {{ map_thumbnail_size }}),
                 origin: new google.maps.Point(0, 0),
                 anchor: new google.maps.Point(50, 50)
             }
         });
+
+        google.maps.event.addListener(marker, 'click', function() {
+            window.location = '{{ photo.serving_url(size=None) }}';
+        });
+
     {% endfor %}
   }
   google.maps.event.addDomListener(window, 'load', initialize);
