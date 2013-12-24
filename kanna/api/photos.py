@@ -1,7 +1,6 @@
 from StringIO import StringIO
 
 from google.appengine.api import files
-from google.appengine.api import images
 from google.appengine.ext import ndb
 
 from flask import redirect
@@ -19,11 +18,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
-
-@blueprint.route('/v1/photos/<key>')
-def get_photo_url(key):
-    return images.get_serving_url(key), 200
 
 
 @blueprint.route("/v1/photos", methods=["POST"])
