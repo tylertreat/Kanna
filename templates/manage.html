@@ -2,9 +2,15 @@
 
 {% block content %}
 
+<p>Upload Photo</p>
 <form action="/api/v1/photos" method="POST" enctype="multipart/form-data">
     <input name="file" type="file" />
     <input type="submit" />
 </form>
+
+<ul>
+{% for photo in photos %}
+    <li><a href="/view/{{ photo.key.id() }}">{{ photo.name }}</a></li>
+{% endfor %}
 
 {% endblock content %}

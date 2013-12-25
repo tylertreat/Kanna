@@ -23,11 +23,13 @@ def index():
                            map_thumbnail_size=settings.MAP_THUMBNAIL_SIZE)
 
 
-@blueprint.route('/upload')
+@blueprint.route('/manage')
 def upload():
-    """Render the upload page."""
+    """Render the manage page."""
 
-    return render_template('upload.html')
+    user = get_session_user()
+
+    return render_template('manage.html', photos=user.photos)
 
 
 @blueprint.route('/view/<int:photo_id>')
