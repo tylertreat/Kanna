@@ -31,7 +31,7 @@
             map: map,
             title: '{{ photo.name }}',
             icon: {
-                url: '{{ photo.serving_url() }}',
+                url: '{{ photo.thumbnail_serving_url() }}',
                 size: new google.maps.Size({{ map_thumbnail_size }}, {{ map_thumbnail_size }}),
                 origin: new google.maps.Point(0, 0),
                 anchor: new google.maps.Point(50, 50)

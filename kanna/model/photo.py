@@ -5,6 +5,8 @@ from google.appengine.api import images
 from google.appengine.ext import ndb
 
 from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageOps
 from werkzeug.utils import secure_filename
 
 from kanna import exif
@@ -26,7 +28,10 @@ class Photo(ndb.Model):
     owner = ndb.KeyProperty(kind='User', required=True)
 
     # BlobKey for the photo in the blobstore
-    blob_key = ndb.BlobKeyProperty()
+    primary_blob_key = ndb.BlobKeyProperty()
+
+    # BlobKey for the circle thumbnail in the blobstore
+    thumb_blob_key = ndb.BlobKeyProperty()
 
     # Latitude/Longitude coordinates of the photo
     coordinates = ndb.GeoPtProperty()
@@ -34,8 +39,15 @@ class Photo(ndb.Model):
     # A short description of where the photo was taken
     location = ndb.StringProperty(indexed=False)
 
-    def serving_url(self, size=settings.MAP_THUMBNAIL_SIZE):
-        return images.get_serving_url(self.blob_key, size=size)
+    def primary_serving_url(self, size=settings.MAP_THUMBNAIL_SIZE):
+        """Return the serving url for the photo."""
+
+        return images.get_serving_url(self.primary_blob_key, size=size)
+
+    def thumbnail_serving_url(self, size=settings.MAP_THUMBNAIL_SIZE):
+        """Return the serving url for the photo thumbnail."""
+
+        return images.get_serving_url(self.thumb_blob_key, size=size)
 
 
 def upload(upload_file, image_data, user):
@@ -50,24 +62,67 @@ def upload(upload_file, image_data, user):
         the photo entity for the uploaded file.
     """
 
-    file_name = secure_filename(upload_file.filename)
-    blob_io = files.blobstore.create(
-        mime_type=upload_file.content_type,
-        _blobinfo_uploaded_filename=file_name)
-
-    with files.open(blob_io, 'a') as f:
-        f.write(image_data)
-
-    files.finalize(blob_io)
-    blob_key = files.blobstore.get_blob_key(blob_io)
+    filename = secure_filename(upload_file.filename)
+    blob_key = _write_to_blobstore(filename, image_data,
+                                   upload_file.content_type)
 
     image = Image.open(StringIO(image_data))
+
+    thumbnail = _create_circle_thumbnail(image)
+    thumb_filename = secure_filename('%s_thumb' % upload_file.filename)
+    thumb_key = _write_to_blobstore(thumb_filename, thumbnail, 'image/png')
+
     lat, lon = exif.get_lat_lon(exif.get_exif_data(image))
     coordinates = None if not lat or not lon else ndb.GeoPt(lat, lon)
 
-    photo = Photo(name=file_name, owner=user.key, blob_key=blob_key,
-                  coordinates=coordinates)
+    photo = Photo(name=filename, owner=user.key, primary_blob_key=blob_key,
+                  thumb_blob_key=thumb_key, coordinates=coordinates)
     photo.put()
 
     return photo
+
+
+def _write_to_blobstore(filename, data, content_type):
+    """Write the given file data to the blobstore.
+
+    Args:
+        filename: the name to assign the blobstore file.
+        data: the data to write to the blobstore.
+        content_type: the file mime type.
+
+    Returns:
+        BlobKey for the saved blobstore file.
+    """
+
+    blob_io = files.blobstore.create(
+        mime_type=content_type,
+        _blobinfo_uploaded_filename=filename)
+
+    with files.open(blob_io, 'a') as f:
+        f.write(data)
+
+    files.finalize(blob_io)
+
+    return files.blobstore.get_blob_key(blob_io)
+
+
+def _create_circle_thumbnail(image, size=(512, 512)):
+    """Create a circle thumbnail for the given image.
+
+    Args:
+        image: the image to create the thumbnail for.
+        size: the dimensions of the thumbnail.
+
+    Returns:
+        image data as a string.
+    """
+
+    mask = Image.new('L', size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0) + size, fill=255)
+    output = ImageOps.fit(image, mask.size, centering=(0.5, 0.5))
+    output.putalpha(mask)
+    buff = StringIO()
+    output.save(buff, format='PNG')
+    return buff.getvalue()
 
