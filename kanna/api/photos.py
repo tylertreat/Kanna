@@ -1,17 +1,9 @@
-from StringIO import StringIO
-
-from google.appengine.api import files
-from google.appengine.ext import ndb
-
 from flask import redirect
 from flask import request
-from PIL import Image
-from werkzeug.utils import secure_filename
 
-from kanna import exif
 from kanna.api.blueprint import blueprint
 from kanna.auth import get_session_user
-from kanna.model.photo import Photo
+from kanna.model import photo
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -32,23 +24,7 @@ def upload():
     if not image_data or not allowed_file(upload_file.filename):
         return '', 403
 
-    file_name = secure_filename(upload_file.filename)
-    blob_io = files.blobstore.create(
-        mime_type=upload_file.content_type,
-        _blobinfo_uploaded_filename=file_name)
-
-    with files.open(blob_io, 'a') as f:
-        f.write(image_data)
-
-    files.finalize(blob_io)
-    blob_key = files.blobstore.get_blob_key(blob_io)
-
-    image = Image.open(StringIO(image_data))
-    lat, lon = exif.get_lat_lon(exif.get_exif_data(image))
-    location = None if not lat or not lon else ndb.GeoPt(lat, lon)
-
-    Photo(name=file_name, owner=user.key, blob_key=blob_key,
-          location=location).put()
+    photo.upload(upload_file, image_data, user)
 
     return redirect('/')
 

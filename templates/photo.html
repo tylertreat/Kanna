@@ -7,7 +7,7 @@
     <li>{{ photo.name }}</li>
     <li>Taken by {{ photo.owner.get().email }}</li>
     <li>{{ photo.description }}</li>
-    {%- if photo.location.lat is defined and photo.location.lon is defined %}
+    {%- if photo.location is defined %}
     <li>{{ photo.location }}</li>
     {% endif %}
 </ul>
