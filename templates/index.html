@@ -10,18 +10,17 @@
 {% endblock style_block %}
 
 {% block head_script %}
-<script type="text/javascript"
-    src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&sensor=false">
-</script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&sensor=false"></script>
+<script type="text/javascript" src="/static/js/lib/markerclusterer.js"></script>
 <script type="text/javascript">
   function initialize() {
     var mapOptions = {
-      mapTypeId: google.maps.MapTypeId.TERRAIN,
       center: new google.maps.LatLng(40.0, -100.0),
       zoom: 4,
       minZoom: 3
     };
     var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+    var markers = [];
     {% for photo in photos %}
         {%- if photo.coordinates.lat is not defined or photo.coordinates.lon is not defined %}
             {% continue %}
@@ -43,7 +42,10 @@
             window.location = '/view/{{ photo.key.id() }}';
         });
 
+        markers.push(marker);
+
     {% endfor %}
+    var markerCluster = new MarkerClusterer(map, markers);
   }
   google.maps.event.addDomListener(window, 'load', initialize);
 </script>
