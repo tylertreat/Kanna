@@ -28,3 +28,18 @@ def upload():
 
     return redirect('/')
 
+
+@blueprint.route('/v1/photos/<int:photo_id>/delete')
+def delete(photo_id):
+    to_delete = photo.Photo.get_by_id(photo_id)
+    if not to_delete:
+        return '', 404
+
+    user = get_session_user()
+    if not user or to_delete.owner != user.key:
+        return '', 403
+
+    to_delete.key.delete()
+
+    return redirect('/')
+

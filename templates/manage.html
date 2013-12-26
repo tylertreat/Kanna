@@ -10,7 +10,9 @@
 
 <ul>
 {% for photo in photos %}
-    <li><a href="/view/{{ photo.key.id() }}">{{ photo.name }}</a></li>
+<li><a href="/view/{{ photo.key.id() }}">{{ photo.name }}</a>
+    (<a href="/api/v1/photos/{{ photo.key.id() }}/delete">delete</a>)
+</li>
 {% endfor %}
 
 {% endblock content %}
