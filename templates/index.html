@@ -12,6 +12,7 @@
 {% block head_script %}
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&sensor=false"></script>
 <script type="text/javascript" src="/static/js/lib/markerclusterer.js"></script>
+<script type="text/javascript" src="/static/js/lib/infobubble.js"></script>
 <script type="text/javascript">
   function initialize() {
     var mapOptions = {
@@ -26,7 +27,7 @@
             {% continue %}
         {% endif %}
         var pos = new google.maps.LatLng({{ photo.coordinates.lat }}, {{ photo.coordinates.lon }});
-        var marker = new google.maps.Marker({
+        var marker{{ loop.index }} = new google.maps.Marker({
             position: pos,
             map: map,
             title: '{{ photo.name }}',
@@ -34,15 +35,26 @@
                 url: '{{ photo.thumbnail_serving_url() }}',
                 size: new google.maps.Size({{ map_thumbnail_size }}, {{ map_thumbnail_size }}),
                 origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(50, 50)
+                anchor: new google.maps.Point({{ map_thumbnail_size }} / 2, 0)
             }
         });
 
-        google.maps.event.addListener(marker, 'click', function() {
-            window.location = '/view/{{ photo.key.id() }}';
+        
+        var infoBubble{{ loop.index }} = new InfoBubble({
+            maxWidth: 300,
+            content: '<div><h1>{{ photo.name }}</h1><p>{{ photo.description }}</p></div>'
         });
 
-        markers.push(marker);
+        google.maps.event.addListener(marker{{ loop.index }}, 'click', function() {
+            //window.location = '/view/{{ photo.key.id() }}';
+            if (!infoBubble{{ loop.index }}.isOpen()) {
+                infoBubble{{ loop.index }}.open(map, marker{{ loop.index }});
+            } else {
+                infoBubble{{ loop.index }}.close();
+            }
+        });
+
+        markers.push(marker{{ loop.index }});
 
     {% endfor %}
     var markerCluster = new MarkerClusterer(map, markers);
