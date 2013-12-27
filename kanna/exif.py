@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from PIL.ExifTags import TAGS, GPSTAGS
 
 
@@ -28,21 +30,17 @@ def get_exif_data(image):
     return exif_data
 
 
-def _convert_to_degress(value):
-    """Convert the GPS coordinates stored in the EXIF to degress in float
-    format.
+def get_datetime(exif_data):
+    """Return the datetime in which the photo with the given exif data was
+    taken.
     """
 
-    deg_num, deg_denom = value[0]
-    d = float(deg_num) / float(deg_denom)
+    dt = exif_data.get('DateTimeOriginal', None)
+    if not dt:
+        return None
 
-    min_num, min_denom = value[1]
-    m = float(min_num) / float(min_denom)
-
-    sec_num, sec_denom = value[1]
-    s = float(sec_num) / float(sec_denom)
-
-    return d + (m / 60.0) + (s / 3600.0)
+    # TODO: Try to localize the datetime with a timezone
+    return datetime.strptime(dt, '%Y:%m:%d %H:%M:%S')
 
 
 def get_lat_lon(exif_data):
@@ -73,4 +71,23 @@ def get_lat_lon(exif_data):
                 lon *= -1
 
     return lat, lon
+
+
+def _convert_to_degress(value):
+    """Convert the GPS coordinates stored in the EXIF to degress in float
+    format.
+    """
+
+    deg_num, deg_denom = value[0]
+    d = float(deg_num) / float(deg_denom)
+
+    min_num, min_denom = value[1]
+    m = float(min_num) / float(min_denom)
+
+    sec_num, sec_denom = value[1]
+    s = float(sec_num) / float(sec_denom)
+
+    return d + (m / 60.0) + (s / 3600.0)
+
+
 

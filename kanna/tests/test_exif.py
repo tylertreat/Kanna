@@ -1,3 +1,4 @@
+import datetime
 import unittest
 
 from mock import Mock
@@ -39,7 +40,7 @@ EXIF_DATA = {
 class TestGetExifData(unittest.TestCase):
 
     def test_get_exif_data(self):
-        """Verify get_exif_data returns a dict with EXIF data."""
+        """Verify get_exif_data returns a dict with Exif data."""
 
         mock_image = Mock()
         mock_image._getexif.return_value = EXIF_DATA
@@ -54,7 +55,7 @@ class TestGetLatLon(unittest.TestCase):
 
     def test_no_coords(self):
         """Verify get_lat_lon returns (None, None) when GPS coordinates are
-        not available in the EXIF data.
+        not available in the Exif data.
         """
 
         actual = exif.get_lat_lon(dict())
@@ -62,7 +63,7 @@ class TestGetLatLon(unittest.TestCase):
         self.assertEqual((None, None), actual)
 
     def test_get_coords(self):
-        """Verify get_lat_lon returns the GPS coordinates contained in the EXIF
+        """Verify get_lat_lon returns the GPS coordinates contained in the Exif
         data.
         """
 
@@ -71,3 +72,22 @@ class TestGetLatLon(unittest.TestCase):
         self.assertEqual(42.01694444444444, lat)
         self.assertEqual(-93.6438888888889, lon)
 
+
+class TestGetDateTime(unittest.TestCase):
+
+    def test_no_datetime(self):
+        """Verify get_datetime returns None when the date/time is not available
+        in the Exif data.
+        """
+
+        actual = exif.get_datetime(dict())
+
+        self.assertIsNone(actual)
+
+    def test_get_datetime(self):
+        """Verify get_datetime returns the DateTime contained in the Exif data.
+        """
+
+        actual = exif.get_datetime(EXIF_DATA)
+
+        self.assertEqual(datetime.datetime(2013, 12, 16, 18, 3, 45), actual)

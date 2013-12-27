@@ -1,3 +1,4 @@
+import datetime
 import unittest
 
 from mock import call
@@ -11,12 +12,13 @@ class TestUpload(unittest.TestCase):
 
     @patch('kanna.model.photo.Photo')
     @patch('kanna.model.photo._create_circle_thumbnail')
+    @patch('kanna.model.photo.exif.get_datetime')
     @patch('kanna.model.photo.exif.get_lat_lon')
     @patch('kanna.model.photo.exif.get_exif_data')
     @patch('kanna.model.photo.Image.open')
     @patch('kanna.model.photo._write_to_blobstore')
     def test_happy_path(self, write, image_open, get_exif_data, get_lat_lon,
-                        thumbnail, new_photo):
+                        get_datetime, thumbnail, new_photo):
         """Verify upload saves the photo to the blobstore and creates a new
         Photo entity.
         """
@@ -34,6 +36,7 @@ class TestUpload(unittest.TestCase):
         image_open.return_value = mock_image
         get_exif_data.return_value = {}
         get_lat_lon.return_value = (42.0169444444, -93.6438888889)
+        get_datetime.return_value = datetime.datetime(2013, 12, 22, 18, 3, 40)
         thumbnail.return_value = 'thumbnail'
         mock_photo = Mock()
         new_photo.return_value = mock_photo
@@ -48,10 +51,12 @@ class TestUpload(unittest.TestCase):
 
         get_exif_data.assert_called_once_with(image_open.return_value)
         get_lat_lon.assert_called_once_with(get_exif_data.return_value)
+        get_datetime.assert_called_once_with(get_exif_data.return_value)
         new_photo.assert_called_once_with(
             name=mock_file.filename, owner=mock_user_key,
             primary_blob_key=mock_key, thumb_blob_key=mock_thumb_key,
-            coordinates=ndb.GeoPt(*get_lat_lon.return_value))
+            coordinates=ndb.GeoPt(*get_lat_lon.return_value),
+            timestamp=get_datetime.return_value)
         mock_photo.put.assert_called_once_with()
 
         self.assertEqual(mock_photo, actual)

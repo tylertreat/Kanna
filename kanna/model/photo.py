@@ -51,6 +51,9 @@ class Photo(ndb.Model):
     # A short description of where the photo was taken
     location = ndb.StringProperty(indexed=False)
 
+    # When the photo was taken
+    timestamp = ndb.DateTimeProperty()
+
     # The album this photo belongs to
     album = ndb.KeyProperty(kind='Album')
 
@@ -87,11 +90,14 @@ def upload(upload_file, image_data, user):
     thumb_filename = secure_filename('%s_thumb' % upload_file.filename)
     thumb_key = _write_to_blobstore(thumb_filename, thumbnail, 'image/png')
 
-    lat, lon = exif.get_lat_lon(exif.get_exif_data(image))
+    exif_data = exif.get_exif_data(image)
+    lat, lon = exif.get_lat_lon(exif_data)
     coordinates = None if not lat or not lon else ndb.GeoPt(lat, lon)
+    timestamp = exif.get_datetime(exif_data)
 
     photo = Photo(name=filename, owner=user.key, primary_blob_key=blob_key,
-                  thumb_blob_key=thumb_key, coordinates=coordinates)
+                  thumb_blob_key=thumb_key, coordinates=coordinates,
+                  timestamp=timestamp)
     photo.put()
 
     return photo
