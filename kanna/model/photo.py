@@ -2,6 +2,7 @@ from StringIO import StringIO
 
 from google.appengine.api import files
 from google.appengine.api import images
+from google.appengine.ext import blobstore
 from google.appengine.ext import ndb
 
 from PIL import Image
@@ -56,6 +57,16 @@ class Photo(ndb.Model):
 
     # The album this photo belongs to
     album = ndb.KeyProperty(kind='Album')
+
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        """Clean up blobstore files."""
+
+        photo = key.get()
+        if photo:
+            primary_blob = photo.primary_blob_key
+            thumb_blob = photo.thumb_blob_key
+            blobstore.delete([primary_blob, thumb_blob])
 
     def primary_serving_url(self, size=settings.MAP_THUMBNAIL_SIZE):
         """Return the serving url for the photo."""
