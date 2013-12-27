@@ -31,7 +31,7 @@ class Photo(ndb.Model):
     name = ndb.StringProperty(required=True)
 
     # When was I uploaded?
-    created = ndb.DateTimeProperty(required=True, auto_now_add=True)
+    uploaded = ndb.DateTimeProperty(required=True, auto_now_add=True)
 
     # User description of the photo
     description = ndb.TextProperty()
