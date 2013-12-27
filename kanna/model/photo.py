@@ -13,7 +13,19 @@ from kanna import exif
 from kanna import settings
 
 
+class Album(ndb.Model):
+    """A collection of photos that are somehow related."""
+
+    owner = ndb.KeyProperty(kind='User', required=True)
+    name = ndb.StringProperty(required=True)
+    description = ndb.TextProperty()
+
+
 class Photo(ndb.Model):
+    """Models a photo uploaded by a user. This entity acts as an index into
+    the blobstore since that's where the photos are stored, but it also
+    holds the metadata for the photo.
+    """
 
     # User name of the photo, defaults to filename
     name = ndb.StringProperty(required=True)
@@ -38,6 +50,9 @@ class Photo(ndb.Model):
 
     # A short description of where the photo was taken
     location = ndb.StringProperty(indexed=False)
+
+    # The album this photo belongs to
+    album = ndb.KeyProperty(kind='Album')
 
     def primary_serving_url(self, size=settings.MAP_THUMBNAIL_SIZE):
         """Return the serving url for the photo."""
