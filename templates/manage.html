@@ -1,11 +1,19 @@
 {% extends "base.html" %}
 
+{% block style_block %}
+    <link href="/static/css/dropzone.css" rel="stylesheet">
+{% endblock style_block %}
+
+{% block head_script %}
+    <script src="/static/js/lib/dropzone.js"></script>
+{% endblock head_script %}
+
 {% block content %}
 
-<p>Upload Photo</p>
-<form action="/api/v1/photos" method="POST" enctype="multipart/form-data">
-    <input name="file" type="file" />
-    <input type="submit" />
+<form action="/api/v1/photos" method="POST" class="dropzone" enctype="multipart/form-data">
+  <div class="fallback">
+    <input name="file" type="file" multiple />
+  </div>
 </form>
 
 <ul>
