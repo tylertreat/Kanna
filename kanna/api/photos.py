@@ -1,3 +1,5 @@
+from google.appengine.ext import ndb
+
 from flask import redirect
 from flask import request
 
@@ -24,9 +26,9 @@ def upload():
     if not image_data or not allowed_file(upload_file.filename):
         return '', 403
 
-    photo.upload(upload_file, image_data, user)
+    uploaded = photo.upload(upload_file, image_data, user)
 
-    return redirect('/')
+    return uploaded.json(size=250), 200
 
 
 @blueprint.route('/v1/photos/<int:photo_id>/delete')
@@ -41,5 +43,23 @@ def delete(photo_id):
 
     to_delete.key.delete()
 
-    return redirect('/')
+    return redirect('/manage')
+
+
+@blueprint.route('/v1/photos/<photo_key>', methods=['POST'])
+def update(photo_key):
+    to_update = ndb.Key(urlsafe=photo_key).get()
+    if not to_update:
+        return '', 404
+
+    user = get_session_user()
+    if not user or to_update.owner != user.key:
+        return '', 403
+
+    to_update.name = request.form['name']
+    to_update.description = request.form['description']
+    to_update.location = request.form['location']
+    to_update.put()
+
+    return redirect('/manage')
 

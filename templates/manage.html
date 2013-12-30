@@ -10,17 +10,62 @@
 
 {% block content %}
 
-<form action="/api/v1/photos" method="POST" class="dropzone" enctype="multipart/form-data">
+<form action="/api/v1/photos" method="POST" id="photo-dropzone" class="dropzone" enctype="multipart/form-data">
   <div class="fallback">
     <input name="file" type="file" multiple />
   </div>
 </form>
+<button id="upload">Upload</button>
 
+<p>My Photos</p>
+<table id="photos">
 <ul>
 {% for photo in photos %}
-<li><a href="/view/{{ photo.key.id() }}">{{ photo.name }}</a>
-    (<a href="/api/v1/photos/{{ photo.key.id() }}/delete">delete</a>)
-</li>
+<tr>
+    <td><img src="{{ photo.primary_serving_url(size=250) }}" alt="{{ photo.name }}" /></td>
+    <td>
+        <form action="/api/v1/photos/{{ photo.key.urlsafe() }}" method="POST">
+            Name: <input type="text" name="name" value="{{ photo.name }}" /><br/>
+            Description: <input type="text" name="description" value="{{ photo.description }}" /><br/>
+            Location: <input type="text" name="location" value="{{ photo.location }}" /><br/>
+            <input type="submit" value="update" />
+        </form>
+    </td>
+</tr>
 {% endfor %}
+</table>
+
+<script type="text/javascript">
+Dropzone.options.photoDropzone = {
+
+  // Prevents Dropzone from uploading dropped files immediately
+  autoProcessQueue: false,
+
+  init: function() {
+    var submitButton = $("#upload")
+        myDropzone = this; // closure
+
+    submitButton.click(function() {
+        myDropzone.processQueue(); // Tell Dropzone to process all queued files.
+    });
+
+    this.on("success", function(file, responseText) {
+        var photo = $.parseJSON(responseText);
+        $("#photos").append(
+            "<tr>" + 
+            "<td><img src='" + photo.thumbnail + "' /></td>" +
+            "<td>" + 
+            "<form action='/api/v1/photos/" + photo.key + "' method='POST'>" +
+            "Name: <input type='text' name='name' value='" + photo.name + "' /> <br/>" +
+            "Description: <input type='text' name='description' value='" + photo.description + "' /><br/>" +
+            "Location: <input type='text' name='location' value='" + photo.location + "' /><br/>" + 
+            "<input type='submit' value='update' />" +
+            "</form>" +
+            "</td></tr>");
+    });
+
+  }
+};
+</script>
 
 {% endblock content %}

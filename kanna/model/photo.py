@@ -85,6 +85,7 @@ class Photo(ndb.Model):
 
         entity_dict = to_dict(self)
         entity_dict['thumbnail'] = self.primary_serving_url(size=size)
+        entity_dict['key'] = self.key.urlsafe()
         return json.dumps(entity_dict)
 
 

@@ -114,3 +114,82 @@ class TestDelete(unittest.TestCase):
         get_by_id.return_value.key.delete.assert_called_once_with()
         self.assertEqual(redirect.return_value, actual)
 
+
+@patch('kanna.api.photos.ndb.Key')
+class TestUpdate(unittest.TestCase):
+
+    def test_no_photo(self, key):
+        """Verify update returns a 404 code when there is no photo."""
+
+        mock_key = Mock()
+        mock_key.get.return_value = None
+        key.return_value = mock_key
+        photo_key = '123'
+
+        resp, status = photos.update(photo_key)
+
+        key.assert_called_once_with(urlsafe=photo_key)
+        mock_key.get.assert_called_once_with()
+        self.assertEqual(404, status)
+        self.assertEqual('', resp)
+
+    @patch('kanna.api.photos.get_session_user')
+    def test_no_user(self, get_user, key):
+        """Verify update returns a 403 when there is no user."""
+
+        mock_key = Mock()
+        mock_key.get.return_value = Mock()
+        key.return_value = mock_key
+        get_user.return_value = None
+        photo_key = '123'
+
+        resp, status = photos.update(photo_key)
+
+        key.assert_called_once_with(urlsafe=photo_key)
+        mock_key.get.assert_called_once_with()
+        get_user.assert_called_once_with()
+        self.assertEqual(403, status)
+        self.assertEqual('', resp)
+
+    @patch('kanna.api.photos.get_session_user')
+    def test_not_owner(self, get_user, key):
+        """Verify update returns a 403 when the user is not the photo owner."""
+
+        mock_key = Mock()
+        mock_key.get.return_value = Mock(owner='owner_key')
+        key.return_value = mock_key
+        get_user.return_value = Mock(key='key')
+        photo_key = '123'
+
+        resp, status = photos.update(photo_key)
+
+        key.assert_called_once_with(urlsafe=photo_key)
+        mock_key.get.assert_called_once_with()
+        get_user.assert_called_once_with()
+        self.assertEqual(403, status)
+        self.assertEqual('', resp)
+
+    @patch('kanna.api.photos.redirect')
+    @patch('kanna.api.photos.request')
+    @patch('kanna.api.photos.get_session_user')
+    def test_update(self, get_user, request, redirect, key):
+        """Verify update updates the entity."""
+
+        mock_key = Mock()
+        mock_key.get.return_value = Mock(owner='owner_key')
+        key.return_value = mock_key
+        get_user.return_value = Mock(key='owner_key')
+        photo_key = '123'
+        type(request).form = PropertyMock(return_value={'name': 'foo',
+                                                        'description': 'bar',
+                                                        'location': 'baz'})
+        redirect.return_value = 'redirect'
+
+        actual = photos.update(photo_key)
+
+        key.assert_called_once_with(urlsafe=photo_key)
+        mock_key.get.assert_called_once_with()
+        get_user.assert_called_once_with()
+        mock_key.get.return_value.put.assert_called_once_with()
+        self.assertEqual(redirect.return_value, actual)
+
