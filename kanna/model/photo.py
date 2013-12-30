@@ -1,3 +1,4 @@
+import json
 from StringIO import StringIO
 
 from google.appengine.api import files
@@ -77,6 +78,14 @@ class Photo(ndb.Model):
         """Return the serving url for the photo thumbnail."""
 
         return images.get_serving_url(self.thumb_blob_key, size=size)
+
+    def json(self, size=settings.MAP_THUMBNAIL_SIZE):
+        """Return the Photo as a json string."""
+        from kanna.utils import to_dict
+
+        entity_dict = to_dict(self)
+        entity_dict['thumbnail'] = self.primary_serving_url(size=size)
+        return json.dumps(entity_dict)
 
 
 def upload(upload_file, image_data, user):
