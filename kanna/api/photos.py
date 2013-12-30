@@ -60,6 +60,16 @@ def update(photo_key):
     to_update.name = request.form['name']
     to_update.description = request.form['description']
     to_update.location = request.form['location']
+
+    album = request.form['album']
+    if album == 'None':
+        album = None
+    else:
+        album = photo.Album.get_by_id('%s_%s' % (user.key.id(), album.lower()))
+
+    print album
+    to_update.album = None if not album else album.key
+
     to_update.put()
 
     return redirect('/manage')

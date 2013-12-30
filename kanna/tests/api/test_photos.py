@@ -193,7 +193,8 @@ class TestUpdate(unittest.TestCase):
         photo_key = '123'
         type(request).form = PropertyMock(return_value={'name': 'foo',
                                                         'description': 'bar',
-                                                        'location': 'baz'})
+                                                        'location': 'baz',
+                                                        'album': 'None'})
         redirect.return_value = 'redirect'
 
         actual = photos.update(photo_key)

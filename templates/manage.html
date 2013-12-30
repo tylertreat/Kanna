@@ -30,6 +30,12 @@
                         Name: <input type="text" name="name" value="{{ photo.name }}" /><br/>
                         Description: <input type="text" name="description" value="{{ photo.description }}" /><br/>
                         Location: <input type="text" name="location" value="{{ photo.location }}" /><br/>
+                        Album: <select name="album">
+                            <option value="none">None</option>
+                            {% for album in albums %}
+                            <option value="{{ album.name }}">{{ album.name }}</option>
+                            {% endfor %}
+                            </select>
                         <input type="submit" value="update" />
                     </form>
                     
@@ -93,6 +99,11 @@ Dropzone.options.photoDropzone = {
             "Name: <input type='text' name='name' value='" + photo.name + "' /> <br/>" +
             "Description: <input type='text' name='description' value='" + photo.description + "' /><br/>" +
             "Location: <input type='text' name='location' value='" + photo.location + "' /><br/>" + 
+            "Album: <select name='album'><option value='none'>None</option>" + 
+                            {% for album in albums %}
+                            "<option value='{{ album.name }}'>{{ album.name }}</option>" + 
+                            {% endfor %}
+                            "</select>" + 
             "<input type='submit' value='update' />" +
             "</form>" +
             "</td></tr>");

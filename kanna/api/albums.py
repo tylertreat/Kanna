@@ -19,7 +19,8 @@ def new_album():
     if existing:
         return '', 409
 
-    album = Album(name=name, description=description, owner=user.key)
+    album = Album(id='%s_%s' % (user.key.id(), name.lower()), name=name,
+                  description=description, owner=user.key)
     album.put()
 
     return redirect('/manage')
