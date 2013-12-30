@@ -10,4 +10,4 @@ httpagentparser
 webob
 itsdangerous
 git+git://github.com/tylertreat/furious.git#egg=furious
-git+git://github.com/tylertreat/gae-utils.git#egg=gae_utils
+git+git://github.com/tylertreat/gaeutils.git#egg=gaeutils
