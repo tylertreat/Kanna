@@ -46,7 +46,6 @@
         });
 
         google.maps.event.addListener(marker{{ loop.index }}, 'click', function() {
-            //window.location = '/view/{{ photo.key.id() }}';
             if (!infoBubble{{ loop.index }}.isOpen()) {
                 infoBubble{{ loop.index }}.open(map, marker{{ loop.index }});
             } else {
