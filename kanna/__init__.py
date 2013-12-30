@@ -9,6 +9,7 @@ from kanna.api.blueprint import blueprint as api_blueprint
 from kanna.view.blueprint import blueprint as view_blueprint
 
 # Imported to register urls
+from kanna.api import albums
 from kanna.api import photos
 from kanna.view import views
 

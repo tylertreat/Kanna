@@ -17,28 +17,56 @@
 </form>
 <button id="upload">Upload</button>
 
-<p>My Photos</p>
-<table id="photos">
-<ul>
-{% for photo in photos %}
-<tr>
-    <td><img src="{{ photo.primary_serving_url(size=250) }}" alt="{{ photo.name }}" /></td>
-    <td>
-        <form action="/api/v1/photos/{{ photo.key.urlsafe() }}" method="POST">
-            Name: <input type="text" name="name" value="{{ photo.name }}" /><br/>
-            Description: <input type="text" name="description" value="{{ photo.description }}" /><br/>
-            Location: <input type="text" name="location" value="{{ photo.location }}" /><br/>
-            <input type="submit" value="update" />
-        </form>
-        
-    </td>
-    <td>
-        <form action="/api/v1/photos/{{ photo.key.urlsafe() }}/delete">
-            <input type="submit" value="delete" />
-        </form>
-    </td>
-</tr>
-{% endfor %}
+<table width="100%">
+    <tr>
+        <td width="50%">
+            <p>My Photos</p>
+            <table id="photos">
+            {% for photo in photos %}
+            <tr>
+                <td><img src="{{ photo.primary_serving_url(size=250) }}" alt="{{ photo.name }}" /></td>
+                <td>
+                    <form action="/api/v1/photos/{{ photo.key.urlsafe() }}" method="POST">
+                        Name: <input type="text" name="name" value="{{ photo.name }}" /><br/>
+                        Description: <input type="text" name="description" value="{{ photo.description }}" /><br/>
+                        Location: <input type="text" name="location" value="{{ photo.location }}" /><br/>
+                        <input type="submit" value="update" />
+                    </form>
+                    
+                </td>
+                <td>
+                    <form action="/api/v1/photos/{{ photo.key.urlsafe() }}/delete">
+                        <input type="submit" value="delete" />
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </table>
+        </td>
+
+        <td width="50%">
+            <p>My Albums</p>
+            <form action="/api/v1/albums" method="POST">
+                Name: <input type="text" name="name" />
+                Description <input type="text" name="description" />
+                <input type="submit" value="new album" />
+            </form>
+            <table id="albums">
+            {% for album in albums %}
+            <tr>
+                <td>
+                    <form action="/api/v1/albums/{{ album.key.urlsafe() }}" method="POST">
+                        <br/>
+                        Name: <input type="text" name="name" value="{{ album.name }}" /><br/>
+                        Description: <input type="text" name="description" value="{{ album.description }}" />
+                        <input type="submit" value="update" />
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </table>
+        </td>
+    </tr>
 </table>
 
 <script type="text/javascript">

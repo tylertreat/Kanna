@@ -29,7 +29,8 @@ def upload():
 
     user = get_session_user()
 
-    return render_template('manage.html', photos=user.photos)
+    return render_template('manage.html', photos=user.photos,
+                           albums=user.albums)
 
 
 @blueprint.route('/view/<int:photo_id>')
