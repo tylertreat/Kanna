@@ -31,9 +31,10 @@ def upload():
     return uploaded.json(size=250), 200
 
 
-@blueprint.route('/v1/photos/<int:photo_id>/delete')
-def delete(photo_id):
-    to_delete = photo.Photo.get_by_id(photo_id)
+# TODO: this should require a DELETE request eventually w/o the /delete
+@blueprint.route('/v1/photos/<photo_key>/delete')
+def delete(photo_key):
+    to_delete = ndb.Key(urlsafe=photo_key).get()
     if not to_delete:
         return '', 404
 

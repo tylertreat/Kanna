@@ -50,68 +50,79 @@ class TestUpload(unittest.TestCase):
         self.assertEqual('', resp)
 
 
-@patch('kanna.api.photos.photo.Photo.get_by_id')
+@patch('kanna.api.photos.photo.ndb.Key')
 class TestDelete(unittest.TestCase):
 
-    def test_no_photo(self, get_by_id):
+    def test_no_photo(self, key):
         """Verify delete returns a 404 code when there is no photo."""
 
-        get_by_id.return_value = None
-        photo_id = '123'
+        mock_key = Mock()
+        mock_key.get.return_value = None
+        key.return_value = mock_key
+        photo_key = '123'
 
-        resp, status = photos.delete(photo_id)
+        resp, status = photos.delete(photo_key)
 
-        get_by_id.assert_called_once_with(photo_id)
+        key.assert_called_once_with(urlsafe=photo_key)
+        mock_key.get.assert_called_once_with()
         self.assertEqual(404, status)
         self.assertEqual('', resp)
 
     @patch('kanna.api.photos.get_session_user')
-    def test_no_user(self, get_user, get_by_id):
+    def test_no_user(self, get_user, key):
         """Verify delete returns a 403 when there is no user."""
 
-        get_by_id.return_value = Mock()
+        mock_key = Mock()
+        mock_key.get.return_value = Mock(owner='owner_key')
+        key.return_value = mock_key
         get_user.return_value = None
-        photo_id = '123'
+        photo_key = '123'
 
-        resp, status = photos.delete(photo_id)
+        resp, status = photos.delete(photo_key)
 
-        get_by_id.assert_called_once_with(photo_id)
+        key.assert_called_once_with(urlsafe=photo_key)
+        mock_key.get.assert_called_once_with()
         get_user.assert_called_once_with()
         self.assertEqual(403, status)
         self.assertEqual('', resp)
 
     @patch('kanna.api.photos.get_session_user')
-    def test_not_owner(self, get_user, get_by_id):
+    def test_not_owner(self, get_user, key):
         """Verify delete returns a 403 when the user is not the photo owner."""
 
-        get_by_id.return_value = Mock(owner='owner_key')
+        mock_key = Mock()
+        mock_key.get.return_value = Mock(owner='owner_key')
+        key.return_value = mock_key
         get_user.return_value = Mock(key='key')
-        photo_id = '123'
+        photo_key = '123'
 
-        resp, status = photos.delete(photo_id)
+        resp, status = photos.delete(photo_key)
 
-        get_by_id.assert_called_once_with(photo_id)
+        key.assert_called_once_with(urlsafe=photo_key)
+        mock_key.get.assert_called_once_with()
         get_user.assert_called_once_with()
         self.assertEqual(403, status)
         self.assertEqual('', resp)
 
     @patch('kanna.api.photos.redirect')
     @patch('kanna.api.photos.get_session_user')
-    def test_delete(self, get_user, redirect, get_by_id):
+    def test_delete(self, get_user, redirect, key):
         """Verify delete deletes the photo entity."""
 
-        key = 'key'
-        photo_key = Mock()
-        get_by_id.return_value = Mock(key=photo_key, owner=key)
-        get_user.return_value = Mock(key=key)
+        mock_key = Mock()
+        mock_photo_key = Mock()
+        mock_key.get.return_value = Mock(key=mock_photo_key, owner='owner_key')
+        key.return_value = mock_key
+        get_user.return_value = Mock(key='owner_key')
         redirect.return_value = 'redirect'
-        photo_id = '123'
+        photo_key = '123'
 
-        actual = photos.delete(photo_id)
+        actual = photos.delete(photo_key)
 
-        get_by_id.assert_called_once_with(photo_id)
+        key.assert_called_once_with(urlsafe=photo_key)
+        mock_key.get.assert_called_once_with()
         get_user.assert_called_once_with()
-        get_by_id.return_value.key.delete.assert_called_once_with()
+        mock_photo_key.delete.assert_called_once_with()
         self.assertEqual(redirect.return_value, actual)
 
 

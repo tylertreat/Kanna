@@ -30,6 +30,12 @@
             Location: <input type="text" name="location" value="{{ photo.location }}" /><br/>
             <input type="submit" value="update" />
         </form>
+        
+    </td>
+    <td>
+        <form action="/api/v1/photos/{{ photo.key.urlsafe() }}/delete">
+            <input type="submit" value="delete" />
+        </form>
     </td>
 </tr>
 {% endfor %}
