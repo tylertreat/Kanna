@@ -42,7 +42,7 @@
         
         var infoBubble{{ loop.index }} = new InfoBubble({
             maxWidth: 300,
-            content: '<div><h1>{{ photo.name }}</h1><p>{{ photo.description }}</p></div>'
+            content: '<div><h1>{{ photo.name }}</h1><p>{{ photo.description }}</p><p>{{ photo.album.get().name }}</p></div>'
         });
 
         google.maps.event.addListener(marker{{ loop.index }}, 'click', function() {
